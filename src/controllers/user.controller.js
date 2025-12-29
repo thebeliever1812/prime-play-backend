@@ -447,11 +447,13 @@ export const handleUpdateCoverImage = async (req, res) => {
 
     const oldCoverImageId = user?.coverImageId;
 
-    const isDeletedCoverImage =
-        await deleteImageFileFromCloudinary(oldCoverImageId);
-
-    if (isDeletedCoverImage.result !== "ok") {
-        throw new ApiError(400, "Failed to delete old cover image");
+    if (oldCoverImageId) {
+        const isDeletedCoverImage =
+            await deleteImageFileFromCloudinary(oldCoverImageId);
+        
+        if (isDeletedCoverImage.result !== "ok") {
+            throw new ApiError(400, "Failed to delete old cover image");
+        }
     }
 
     const result = await uploadOnCloudinary(newCoverImageLocalFilePath);
@@ -461,9 +463,10 @@ export const handleUpdateCoverImage = async (req, res) => {
     }
 
     const newCoverImageUrl = result?.secure_url;
+    const newCoverImageId = result?.public_id;
 
     await User.findByIdAndUpdate(req.user?._id, {
-        $set: { coverImage: newCoverImageUrl },
+        $set: { coverImage: newCoverImageUrl, coverImageId: newCoverImageId },
     });
 
     res.status(201).json(
@@ -721,6 +724,10 @@ export const handleGetChannelStats = async (req, res) => {
         },
         {
             $project: {
+                fullName: 1,
+                username: 1,
+                avatar: 1,
+                coverImage: 1,
                 totalLikes: 1,
                 totalViews: 1,
                 totalSubscribers: 1,
