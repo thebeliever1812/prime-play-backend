@@ -359,11 +359,13 @@ export const handleUpdateAvatar = async (req, res) => {
 
     const oldAvatarImageId = user?.avatarImageId;
 
-    const isDeletedAvatar =
-        await deleteImageFileFromCloudinary(oldAvatarImageId);
-
-    if (isDeletedAvatar.result !== "ok") {
-        throw new ApiError(400, "Failed to delete old avatar");
+    if (oldAvatarImageId) {
+        const isDeletedAvatar = await deleteImageFileFromCloudinary(
+            oldAvatarImageId
+        );
+        if (isDeletedAvatar.result !== "ok") {
+            throw new ApiError(400, "Failed to delete old avatar image");
+        }
     }
 
     const result = await uploadOnCloudinary(newAvatarLocalFilePath);
@@ -373,9 +375,10 @@ export const handleUpdateAvatar = async (req, res) => {
     }
 
     const newAvatarUrl = result?.secure_url;
+    const newAvatarImageId = result?.public_id;
 
     await User.findByIdAndUpdate(req.user?._id, {
-        $set: { avatar: newAvatarUrl },
+        $set: { avatar: newAvatarUrl, avatarImageId: newAvatarImageId },
     });
 
     res.status(201).json(new ApiResponse(201, "Avatar updated successfully"));
