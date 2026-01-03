@@ -251,8 +251,15 @@ export const handlePlayVideo = async (req, res) => {
     );
 };
 
-export const handleGetAllVideos = async (_req, res) => {
+export const handleGetAllVideos = async (req, res) => {
+    const limit = parseInt(req.query.limit) || 6;
+    const cursor = req.query.cursor;
+
+    const matchStage = cursor ? { createdAt: { $lt: new Date(cursor) } } : {};
     const videos = await Video.aggregate([
+        {
+            $match: matchStage,
+        },
         {
             $lookup: {
                 from: "users",
@@ -268,6 +275,9 @@ export const handleGetAllVideos = async (_req, res) => {
             $sort: {
                 createdAt: -1,
             },
+        },
+        {
+            $limit: limit + 1,
         },
         {
             $project: {
@@ -288,11 +298,26 @@ export const handleGetAllVideos = async (_req, res) => {
     ]);
 
     if (videos.length === 0) {
-        throw new ApiError(404, "No videos found");
+        return res.status(200).json(
+            new ApiResponse(200, "No more videos", {
+                videos: [],
+                nextCursor: null,
+            })
+        );
+    }
+
+    let nextCursor = null;
+
+    if (videos.length > limit) {
+        videos.pop();
+        nextCursor = videos[videos.length - 1].createdAt;
     }
 
     res.status(200).json(
-        new ApiResponse(200, "Videos fetched successfully", videos)
+        new ApiResponse(200, "Videos fetched successfully", {
+            videos,
+            nextCursor,
+        })
     );
 };
 
