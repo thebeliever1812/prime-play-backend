@@ -360,9 +360,8 @@ export const handleUpdateAvatar = async (req, res) => {
     const oldAvatarImageId = user?.avatarImageId;
 
     if (oldAvatarImageId) {
-        const isDeletedAvatar = await deleteImageFileFromCloudinary(
-            oldAvatarImageId
-        );
+        const isDeletedAvatar =
+            await deleteImageFileFromCloudinary(oldAvatarImageId);
         if (isDeletedAvatar.result !== "ok") {
             throw new ApiError(400, "Failed to delete old avatar image");
         }
@@ -453,7 +452,7 @@ export const handleUpdateCoverImage = async (req, res) => {
     if (oldCoverImageId) {
         const isDeletedCoverImage =
             await deleteImageFileFromCloudinary(oldCoverImageId);
-        
+
         if (isDeletedCoverImage.result !== "ok") {
             throw new ApiError(400, "Failed to delete old cover image");
         }
@@ -618,38 +617,43 @@ export const handleWatchHistory = async (req, res) => {
                 _id: new mongoose.Types.ObjectId(String(req.user._id)),
             },
         },
+
+        // 1️⃣ break array but keep order
+        { $unwind: "$watchHistory" },
+
+        // 2️⃣ lookup each video
         {
             $lookup: {
                 from: "videos",
-                localField: "watchHistory",
+                localField: "watchHistory.video",
                 foreignField: "_id",
-                as: "watchHistory",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "users",
-                            localField: "owner",
-                            foreignField: "_id",
-                            as: "owner",
-                            pipeline: [
-                                {
-                                    $project: {
-                                        fullName: 1,
-                                        username: 1,
-                                        avatar: 1,
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        $addFields: {
-                            owner: {
-                                $first: "$owner",
-                            },
-                        },
-                    },
-                ],
+                as: "video",
+            },
+        },
+
+        { $unwind: "$video" },
+
+        // 3️⃣ populate owner
+        {
+            $lookup: {
+                from: "users",
+                localField: "video.owner",
+                foreignField: "_id",
+                as: "video.owner",
+            },
+        },
+        {
+            $addFields: {
+                "video.owner": { $first: "$video.owner" },
+                "video.watchedAt": "$watchHistory.watchedAt",
+            },
+        },
+
+        // 4️⃣ restore original array order
+        {
+            $group: {
+                _id: "$_id",
+                watchHistory: { $push: "$video" },
             },
         },
     ]);
@@ -660,7 +664,7 @@ export const handleWatchHistory = async (req, res) => {
             new ApiResponse(
                 200,
                 "Watch history fetched successfully",
-                user[0].watchHistory
+                user[0]?.watchHistory || []
             )
         );
 };
@@ -768,14 +772,16 @@ export const handleDeleteFromHistory = async (req, res) => {
         throw new ApiError(404, "User not found while deleting from history");
     }
 
-    const isVideoInHistory = user.watchHistory.includes(videoId);
+    const isVideoInHistory = user.watchHistory.some(
+        (item) => item.video.toString() === videoId
+    );
 
     if (!isVideoInHistory) {
         throw new ApiError(400, "Video not found in watch history");
     }
 
     user.watchHistory = user.watchHistory.filter(
-        (id) => id.toString() !== videoId.toString()
+        (item) => item.video.toString() !== videoId
     );
 
     await user.save({ validateBeforeSave: false });

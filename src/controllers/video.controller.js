@@ -154,19 +154,43 @@ export const handlePlayVideo = async (req, res) => {
     }
 
     if (req.user) {
+        const userId = req.user._id;
+        const videoObjectId = new mongoose.Types.ObjectId(videoId); // 🔥 FIX
+
+        // 1️⃣ remove old entry
         await User.updateOne(
-            { _id: req.user._id, watchHistory: { $ne: videoId } }, // match only if not present
-            { $addToSet: { watchHistory: videoId } } // add only if absent
+            { _id: userId },
+            { $pull: { watchHistory: { video: videoObjectId } } } // 🔥 FIX
         );
 
-        const videoDetails = await Video.findById(videoId);
+        // 2️⃣ push to top
+        await User.updateOne(
+            { _id: userId },
+            {
+                $push: {
+                    watchHistory: {
+                        $each: [
+                            { video: videoObjectId, watchedAt: new Date() },
+                        ], // 🔥 FIX
+                        $position: 0,
+                    },
+                },
+            }
+        );
+
+        // views logic (unchanged)
+        const videoDetails = await Video.findById(videoObjectId);
+
+        if (!videoDetails) {
+            throw new ApiError(404, "Video not found");
+        }
 
         const isAlreadyViewed = videoDetails.viewers.some((id) =>
-            id.equals(req.user._id)
+            id.equals(userId)
         );
 
         if (!isAlreadyViewed) {
-            videoDetails.viewers.push(req.user._id);
+            videoDetails.viewers.push(userId);
             videoDetails.views += 1;
             await videoDetails.save({ validateBeforeSave: false });
         }

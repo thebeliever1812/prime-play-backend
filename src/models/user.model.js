@@ -54,8 +54,14 @@ export const UserSchema = new Schema(
         ],
         watchHistory: [
             {
-                type: Schema.Types.ObjectId,
-                ref: "Video",
+                video: {
+                    type: Schema.Types.ObjectId,
+                    ref: "Video",
+                },
+                watchedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
             },
         ],
         refreshToken: {
@@ -89,7 +95,7 @@ UserSchema.methods.generateAccessToken = function () {
         fullName: this.fullName,
         email: this.email,
         avatar: this.avatar,
-        coverImage: this.coverImage
+        coverImage: this.coverImage,
     };
     const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
     const accessTokenExpiry = process.env.ACCESS_TOKEN_EXPIRY;
