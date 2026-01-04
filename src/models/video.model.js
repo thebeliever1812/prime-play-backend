@@ -53,6 +53,12 @@ const VideoSchema = new Schema(
     { timestamps: true }
 );
 
+/* TEXT INDEX FOR SEARCH */
+VideoSchema.index({
+    title: "text",
+    description: "text",
+});
+
 VideoSchema.plugin(mongooseAggregatePaginate);
 
 export const Video = model("Video", VideoSchema);

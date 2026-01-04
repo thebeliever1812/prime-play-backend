@@ -278,12 +278,43 @@ export const handlePlayVideo = async (req, res) => {
 export const handleGetAllVideos = async (req, res) => {
     const limit = parseInt(req.query.limit) || 6;
     const cursor = req.query.cursor;
+    const search = req.query.search?.trim();
 
-    const matchStage = cursor ? { createdAt: { $lt: new Date(cursor) } } : {};
-    const videos = await Video.aggregate([
-        {
-            $match: matchStage,
-        },
+    const matchStage = {};
+
+    if (search) {
+        matchStage.$text = { $search: search };
+    }
+
+    if (cursor) {
+        matchStage.createdAt = { $lt: new Date(cursor) };
+    }
+
+    const pipeline = [
+        { $match: matchStage },
+
+        ...(search
+            ? [
+                  {
+                      $addFields: {
+                          score: { $meta: "textScore" },
+                      },
+                  },
+                  {
+                      $sort: {
+                          score: -1, // relevance
+                          createdAt: -1, // tie-breaker
+                      },
+                  },
+              ]
+            : [
+                  {
+                      $sort: {
+                          createdAt: -1,
+                      },
+                  },
+              ]),
+
         {
             $lookup: {
                 from: "users",
@@ -292,17 +323,11 @@ export const handleGetAllVideos = async (req, res) => {
                 as: "ownerInfo",
             },
         },
-        {
-            $unwind: "$ownerInfo",
-        },
-        {
-            $sort: {
-                createdAt: -1,
-            },
-        },
-        {
-            $limit: limit + 1,
-        },
+
+        { $unwind: "$ownerInfo" },
+
+        { $limit: limit + 1 },
+
         {
             $project: {
                 title: 1,
@@ -319,7 +344,9 @@ export const handleGetAllVideos = async (req, res) => {
                 },
             },
         },
-    ]);
+    ];
+
+    const videos = await Video.aggregate(pipeline);
 
     if (videos.length === 0) {
         return res.status(200).json(
