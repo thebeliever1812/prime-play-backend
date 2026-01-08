@@ -47,6 +47,7 @@ import authRouter from "./routes/auth.routes.js";
 import subscribeRouter from "./routes/subscribe.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import likeRouter from "./routes/like.routes.js";
+import donationRouter from "./routes/donation.routes.js"
 
 // routes declaration
 app.use("/api/v1/user", userRouter);
@@ -60,5 +61,7 @@ app.use("/api/v1/subscribe", subscribeRouter);
 app.use("/api/v1/comment", commentRouter);
 
 app.use("/api/v1/like", likeRouter);
+
+app.use("/api/v1/donation", donationRouter);
 
 export default app;
