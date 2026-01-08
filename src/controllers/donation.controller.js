@@ -3,7 +3,7 @@ import { razorpay } from "../utils/razorpay.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-export const handleCreateOrder = async () => {
+export const handleCreateOrder = async (req, res) => {
     const { amount } = req.body;
 
     if (!amount || amount < 1) {
@@ -24,7 +24,7 @@ export const handleCreateOrder = async () => {
         );
 };
 
-export const handleVerifyPayment = () => {
+export const handleVerifyPayment = (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
         req.body;
 
