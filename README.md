@@ -14,7 +14,7 @@ It manages authentication, video uploads, playlists, comments, likes, search, su
 ## 🔗 Frontend Repository
 
 You can find the frontend source code here:
-👉 **[Prime Play Frontend Repository](https://github.com/thebeliever1812/prime-play-frontend)**
+👉 **[Prime Play Frontend Repository](https://github.com/thebeliever1812/prime-play)**
 
 ---
 
