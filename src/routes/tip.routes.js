@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { handleCreateOrder, handleVerifyPayment } from "../controllers/donation.controller.js";
+import { handleCreateOrder, handleVerifyPayment } from "../controllers/tip.controller.js";
 
 const router = Router();
 
