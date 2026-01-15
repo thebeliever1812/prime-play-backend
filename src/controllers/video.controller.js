@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import { Like } from "../models/like.model.js";
+import { Notification } from "../models/notification.model.js";
 import fs from "fs";
 
 export const handleUploadVideo = async (req, res) => {
@@ -108,6 +109,65 @@ export const handleUploadVideo = async (req, res) => {
     user.myVideos.push(video._id);
 
     await user.save({ validateBeforeSave: false });
+
+    const subscribers = await User.aggregate([
+        {
+            $match: { _id: new mongoose.Types.ObjectId(req.user._id) },
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers",
+                pipeline: [
+                    {
+                        $project: {
+                            _id: 0,
+                            subscriber: 1, // only subscriber id
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $project: {
+                subscribers: "$subscribers.subscriber",
+            },
+        },
+    ]);
+
+    const subscribersList = subscribers[0]?.subscribers || [];
+
+    const io = req.app.get("io");
+
+    if (subscribersList.length !== 0) {
+        const notifications = subscribersList.map((subscriberId) => ({
+            recipient: subscriberId,
+            sender: user._id,
+            type: "NEW_VIDEO",
+            message: "New Video uploaded",
+            video: video._id,
+            channel: user._id,
+        }));
+
+        const isNotificationAdded = await Notification.insertMany(notifications)
+
+        if (!isNotificationAdded) {
+            throw new ApiError(500, "Failed to add notifications for subscribers");
+        }
+
+        // Emit socket event to each subscriber
+        subscribersList.forEach((subscriberId) => {
+            io.to(subscriberId.toString()).emit("notification:new", {
+                type: "NEW_VIDEO",
+                message: `${user.fullName} uploaded a new video`,
+                videoId: video._id,
+                channelId: user._id,
+                createdAt: new Date(),
+            });
+        });
+    }
 
     res.status(201).json(new ApiResponse(201, "Video uploaded successfully"));
 };
