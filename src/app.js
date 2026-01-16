@@ -48,6 +48,7 @@ import subscribeRouter from "./routes/subscribe.routes.js";
 import commentRouter from "./routes/comment.routes.js";
 import likeRouter from "./routes/like.routes.js";
 import tipRouter from "./routes/tip.routes.js"
+import notificationRouter from "./routes/notification.routes.js"
 
 // routes declaration
 app.use("/api/v1/user", userRouter);
@@ -63,5 +64,7 @@ app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/like", likeRouter);
 
 app.use("/api/v1/tip", tipRouter);
+
+app.use("api/v1/notification", notificationRouter)
 
 export default app;
