@@ -65,6 +65,6 @@ app.use("/api/v1/like", likeRouter);
 
 app.use("/api/v1/tip", tipRouter);
 
-app.use("api/v1/notification", notificationRouter)
+app.use("/api/v1/notification", notificationRouter)
 
 export default app;
