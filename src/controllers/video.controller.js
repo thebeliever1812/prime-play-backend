@@ -151,20 +151,17 @@ export const handleUploadVideo = async (req, res) => {
             channel: user._id,
         }));
 
-        const isNotificationAdded = await Notification.insertMany(notifications)
+        const savedNotifications = await Notification.insertMany(notifications);
 
-        if (!isNotificationAdded) {
-            throw new ApiError(500, "Failed to add notifications for subscribers");
-        }
-
-        // Emit socket event to each subscriber
-        subscribersList.forEach((subscriberId) => {
-            io.to(subscriberId.toString()).emit("notification:new", {
-                type: "NEW_VIDEO",
-                message: `${user.fullName} uploaded a new video`,
-                videoId: video._id,
-                channelId: user._id,
-                createdAt: new Date(),
+        savedNotifications.forEach((n) => {
+            io.to(n.recipient.toString()).emit("notification:new", {
+                notificationId: n._id,
+                sender: user.fullName,
+                message: n.message,
+                type: n.type,
+                createdAt: n.createdAt,
+                videoId: n.video,
+                channelId: n.channel,
             });
         });
     }
