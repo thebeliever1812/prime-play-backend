@@ -5,7 +5,7 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
-![Render](https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=white)
+![DigitalOcean](https://img.shields.io/badge/DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean&logoColor=white)
 
 Prime Play Backend is the core API powering **Prime Play**, a feature‑rich modern video‑sharing platform built on the MERN stack.  
 It manages authentication, video uploads, playlists, comments, likes, subscriptions, search, and real-time notifications.
@@ -132,8 +132,8 @@ npm run dev
 
 ## 🌐 Deployment
 
-The backend is deployed on **Render**.
-Ensure all environment variables are configured inside Render Dashboard.
+The backend is deployed on Digital Ocean.
+Ensure all environment variables are configured inside Digital Ocean Dashboard.
 
 ---
 
