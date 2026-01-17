@@ -3,11 +3,12 @@
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=white)
 
 Prime Play Backend is the core API powering **Prime Play**, a feature‑rich modern video‑sharing platform built on the MERN stack.  
-It manages authentication, video uploads, playlists, comments, likes, search, subscriptions, and more.
+It manages authentication, video uploads, playlists, comments, likes, subscriptions, search, and real-time notifications.
 
 ---
 
@@ -27,10 +28,28 @@ You can find the frontend source code here:
 - 💬 **Comment System** – Add, edit, delete comments  
 - 📁 **Playlist Support** – Create, update, delete playlists  
 - 📜 **Watch History Tracking** – Auto‑records viewed videos  
-- 📌 **Channel Subscriptions** – Subscribe/unsubscribe to channels  
+- 📌 **Channel Subscriptions** – Subscribe/unsubscribe to channels 
+- 🔔 **Notification System** – User notifications for uploads & interactions  
+- 📡 **Real-Time Events** – Socket.IO powered notification delivery   
 - 🔍 **Search API** – Search across videos & channels  
 - 🧪 **Zod Validation** – Input validation  
 - 🔁 **Token Rotation** – Secure auth refresh mechanism  
+
+---
+
+## 🔔 Real-Time Notification System
+
+Prime Play backend includes a scalable real-time notification system built with Socket.IO.
+
+### Highlights
+- 🔁 Emits notifications instantly on key events (e.g., new video uploads)
+- 🗄️ Persists notifications in MongoDB for reliability
+- ⚡ Optimized fetch strategy using aggregation pipelines
+- 📄 Supports limited fetch and full history retrieval
+- ✅ Read / unread status management
+- 🗑️ Notification deletion support
+
+This ensures fast delivery without losing notifications when users are offline.
 
 ---
 
@@ -40,7 +59,8 @@ You can find the frontend source code here:
 - Node.js  
 - Express.js  
 - MongoDB  
-- Mongoose  
+- Mongoose 
+- Socket.IO   
 
 **Authentication & Validation:**  
 - JWT  
