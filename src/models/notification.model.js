@@ -17,6 +17,12 @@ const notificationSchema = new Schema(
             required: true,
         },
 
+        senderName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
         type: {
             type: String,
             enum: ["NEW_VIDEO", "COMMENT", "LIKE", "SUBSCRIBE", "TIP"],

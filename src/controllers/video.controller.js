@@ -145,8 +145,9 @@ export const handleUploadVideo = async (req, res) => {
         const notifications = subscribersList.map((subscriberId) => ({
             recipient: subscriberId,
             sender: user._id,
+            senderName: user.fullName,
             type: "NEW_VIDEO",
-            message: "New Video uploaded",
+            message: video?.title,
             video: video._id,
             channel: user._id,
         }));
@@ -156,7 +157,8 @@ export const handleUploadVideo = async (req, res) => {
         savedNotifications.forEach((n) => {
             io.to(n.recipient.toString()).emit("notification:new", {
                 notificationId: n._id,
-                sender: user.fullName,
+                sender: n.sender,
+                senderName: n.senderName,
                 message: n.message,
                 type: n.type,
                 createdAt: n.createdAt,
@@ -383,7 +385,7 @@ export const handleGetAllVideos = async (req, res) => {
 
         { $unwind: "$ownerInfo" },
 
-        { $limit: limit + 1 },
+        { $limit: limit + 1 },     
 
         {
             $project: {
