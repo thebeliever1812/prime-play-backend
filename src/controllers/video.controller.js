@@ -520,7 +520,13 @@ export const handleGetLikedVideos = async (req, res) => {
     ]);
 
     if (likedVideos.length === 0) {
-        throw new ApiError(404, "No liked videos found");
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "No liked videos found",
+                likedVideos
+            )
+        );
     }
 
     res.status(200).json(
